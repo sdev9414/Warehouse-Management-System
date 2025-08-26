@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary-color: #003366;
+      --primary-dark: #002855;
+      --primary-light: #b3cde0;
+      --accent-color: #0077b6;
+      --danger-color: #c1121f;
+      --success-color: #4F8A10;
+      --background-color: #e9f2fa;
+      --card-background: #ffffff;
+      --text-color: #1b1b1b;
+      --border-color: #d6e0ef;
+      --shadow-sm: 0 2px 8px rgba(0, 51, 102, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 51, 102, 0.12);
+      --shadow-lg: 0 8px 24px rgba(0, 51, 102, 0.16);
+      --border-radius: 8px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e6f0fa, #f0f7ff);
+      color: var(--text-color);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(90deg, var(--primary-dark), #003b7a);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 1.8em;
+      font-weight: bold;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      z-index: 10;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #0077b6, #00a8e8);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1, h2, h3, h4 {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #notification-area {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      width: 300px;
+    }
+
+    .table-container {
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      margin: 1.5rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-background);
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    th {
+      background: linear-gradient(to bottom, #d6e9f8, var(--primary-light));
+      color: var(--primary-color);
+      font-weight: 600;
+      position: relative;
+    }
+
+    th::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: rgba(0, 51, 102, 0.2);
+    }
+
+    tr {
+      transition: var(--transition);
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8fafd;
+    }
+
+    tr:hover {
+      background-color: #eef5fd;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.6rem 1rem;
+      margin: 2px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      color: white;
+      font-weight: 600;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      outline: none;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-add {
+      background: linear-gradient(to right, #00509e, #0074D9);
+    }
+
+    .btn-add:hover {
+      background: linear-gradient(to right, #003f7d, #0066c0);
+    }
+
+    .btn-edit {
+      background: linear-gradient(to right, #0077b6, #00a8e8);
+    }
+
+    .btn-edit:hover {
+      background: linear-gradient(to right, #00669e, #0095cc);
+    }
+
+    .btn-delete {
+      background: linear-gradient(to right, #c1121f, #e63946);
+    }
+
+    .btn-delete:hover {
+      background: linear-gradient(to right, #a50f1a, #d12f3b);
+    }
+
+    .btn-view {
+      background: linear-gradient(to right, #023e8a, #0353a4);
+    }
+
+    .btn-view:hover {
+      background: linear-gradient(to right, #013169, #024c8c);
+    }
+
+    .btn-cancel {
+      background: #6c757d;
+    }
+
+    .btn-cancel:hover {
+      background: #5a6268;
+    }
+
+    .main-action-btn {
+      font-size: 0.95rem;
+      padding: 0.7rem 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-container {
+      background: var(--card-background);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+      margin: 1.5rem 0;
+      border: 1px solid var(--border-color);
+      max-width: 600px;
+    }
+
+    .form-row {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #c4d3e6;
+      border-radius: 6px;
+      background-color: #f9fbfe;
+      color: var(--text-color);
+      transition: border-color 0.3s, box-shadow 0.3s;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.2);
+      background-color: white;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 1.5rem;
+    }
+
+    .details {
+      background: #f0f7ff;
+      padding: 1.2rem;
+      margin-top: 0.5rem;
+      border-radius: var(--border-radius);
+      color: var(--primary-color);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid #d1e3f8;
+    }
+
+    .details h4 {
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+      font-size: 1.1rem;
+    }
+
+    .details table {
+      box-shadow: none;
+      margin-bottom: 0;
+    }
+
+    .details th {
+      background: rgba(179, 205, 224, 0.5);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 1.5rem;
+      font-style: italic;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .loading::before {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #ccc;
+      border-radius: 50%;
+      border-top-color: var(--accent-color);
+      animation: spinner 1s linear infinite;
+    }
+
+    @keyframes spinner {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-message {
+      background-color: #ffedee;
+      color: var(--danger-color);
+      padding: 1rem;
+      margin: 0.8rem 0;
+      border-radius: var(--border-radius);
+      border-left: 4px solid var(--danger-color);
+      display: flex;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .error-message::before {
+      content: "\f071";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      margin-right: 10px;
+      font-size: 1.1rem;
+    }
+
+    .success-message {
+      background-color: #edf9ed;
+      color: var(--success-color);
+      padding: 1rem;
+      margin: 0.8rem 0;
+      border-radius: var(--border-radius);
+      border-left: 4px solid var(--success-color);
+      display: flex;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .success-message::before {
+      content: "\f00c";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      margin-right: 10px;
+      font-size: 1.1rem;
+    }
+
+    .hidden-row {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem;
+      }
+
+      header {
+        padding: 1rem;
+        font-size: 1.5em;
+      }
+
+      th, td {
+        padding: 0.8rem 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+      }
+
+      .form-container {
+        padding: 1.2rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <i class="fas fa-box-open" style="margin-right: 10px;"></i>
+  Product Management
+</header>
+
+<main>
+  <div id="notification-area"></div>
+  
+  <button class="btn-add main-action-btn" onclick="toggleAddForm()">
+    <i class="fas fa-plus-circle"></i> Add New Product
+  </button>
+
+  <div class="table-container">
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Supplier</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productBody">
+        <tr>
+          <td colspan="5" class="loading">Loading products...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Product Form -->
+  <div id="addForm" class="form-container" style="display:none;">
+    <h3><i class="fas fa-plus-circle"></i> Add New Product</h3>
+    <div class="form-row">
+      <label for="addName">Name <span style="color: #c1121f;">*</span></label>
+      <input type="text" id="addName" placeholder="Enter product name">
+    </div>
+    <div class="form-row">
+      <label for="addDescription">Description</label>
+      <input type="text" id="addDescription" placeholder="Enter product description">
+    </div>
+    <div class="form-row">
+      <label for="addSupplier">Supplier <span style="color: #c1121f;">*</span></label>
+      <select id="addSupplier">
+        <option value="">Select Supplier</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-add" onclick="addProduct()">
+        <i class="fas fa-save"></i> Submit
+      </button>
+      <button class="btn-cancel" onclick="toggleAddForm()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Edit Product Form -->
+  <div id="editForm" class="form-container" style="display:none;">
+    <h3><i class="fas fa-edit"></i> Edit Product</h3>
+    <input type="hidden" id="editId">
+    <div class="form-row">
+      <label for="editName">Name <span style="color: #c1121f;">*</span></label>
+      <input type="text" id="editName" placeholder="Enter product name">
+    </div>
+    <div class="form-row">
+      <label for="editDescription">Description</label>
+      <input type="text" id="editDescription" placeholder="Enter product description">
+    </div>
+    <div class="form-row">
+      <label for="editSupplier">Supplier <span style="color: #c1121f;">*</span></label>
+      <select id="editSupplier">
+        <option value="">Select Supplier</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-edit" onclick="updateProduct()">
+        <i class="fas fa-save"></i> Update
+      </button>
+      <button class="btn-cancel" onclick="hideEditForm()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Global variables
+  let currentDetails = null;
+
+  // Load products when the page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    loadProducts();
+    loadSuppliers();
+  });
+
+  // Function to load all products from the API
+  function loadProducts() {
+    fetch('/api/products/all')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(products => {
+        renderProducts(products);
+      })
+      .catch(error => {
+        console.error('Error fetching products:', error);
+        showNotification('Could not load products. Please try again later.', 'error');
+        document.getElementById('productBody').innerHTML = 
+          `<tr><td colspan="5" class="error-message">Failed to load products: ${error.message}</td></tr>`;
+      });
+  }
+
+  // Function to load all suppliers for the dropdown
+  function loadSuppliers() {
+    fetch('/api/suppliers')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(suppliers => {
+        const addSelect = document.getElementById('addSupplier');
+        const editSelect = document.getElementById('editSupplier');
+        
+        // Clear existing options except the first one
+        addSelect.innerHTML = '<option value="">Select Supplier</option>';
+        editSelect.innerHTML = '<option value="">Select Supplier</option>';
+        
+        // Add supplier options
+        suppliers.forEach(supplier => {
+          const addOption = document.createElement('option');
+          addOption.value = supplier.id;
+          addOption.textContent = supplier.name;
+          addSelect.appendChild(addOption);
+          
+          const editOption = document.createElement('option');
+          editOption.value = supplier.id;
+          editOption.textContent = supplier.name;
+          editSelect.appendChild(editOption);
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching suppliers:', error);
+        showNotification('Could not load suppliers. Please try again later.', 'error');
+      });
+  }
+
+  // Render products in the table
+  function renderProducts(products) {
+    const body = document.getElementById("productBody");
+    body.innerHTML = "";
+    
+    if (products.length === 0) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align: center;">No products found</td></tr>';
+      return;
+    }
+    
+    products.forEach(p => {
+      const row = document.createElement("tr");
+      row.setAttribute('data-product-id', p.ProductID);
+      row.innerHTML = `
+        <td>${p.ProductID}</td>
+        <td>${p.Name}</td>
+        <td>${p.Description || 'N/A'}</td>
+        <td>${p.SupplierName || 'N/A'}</td>
+        <td>
+          <div class="action-buttons">
+            <button class="btn-view" onclick="viewDetails(${p.ProductID})">
+              <i class="fas fa-eye"></i> View Stock
+            </button>
+            <button class="btn-edit" onclick="editProduct(${p.ProductID})">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn-delete" onclick="deleteProduct(${p.ProductID})">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+          </div>
+        </td>
+      `;
+      body.appendChild(row);
+      
+      // Add a hidden row for details
+      const detailRow = document.createElement("tr");
+      detailRow.classList.add('hidden-row');
+      detailRow.id = `details-${p.ProductID}`;
+      detailRow.innerHTML = `<td colspan="5"></td>`;
+      body.appendChild(detailRow);
+    });
+  }
+
+  function toggleAddForm() {
+    const form = document.getElementById("addForm");
+    form.style.display = form.style.display === "none" ? "block" : "none";
+    // Reset form fields when showing
+    if (form.style.display === "block") {
+      document.getElementById("addName").value = "";
+      document.getElementById("addDescription").value = "";
+      document.getElementById("addSupplier").value = "";
+    }
+  }
+
+  function hideEditForm() {
+    document.getElementById("editForm").style.display = "none";
+  }
+
+  function addProduct() {
+    const name = document.getElementById("addName").value;
+    const description = document.getElementById("addDescription").value;
+    const supplierId = document.getElementById("addSupplier").value;
+
+    if (!name || !supplierId) {
+      showNotification("Please fill all required fields (Name and Supplier).", "error");
+      return;
+    }
+
+    const productData = {
+      name: name,
+      description: description,
+      supplier_id: parseInt(supplierId)
+    };
+
+    fetch('/api/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(productData),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      showNotification('Product added successfully!', 'success');
+      toggleAddForm();
+      loadProducts(); // Reload the products list
+    })
+    .catch(error => {
+      console.error('Error adding product:', error);
+      showNotification('Failed to add product: ' + error.message, 'error');
+    });
+  }
+
+  function editProduct(id) {
+    // Fetch product details
+    fetch(`/api/products/${id}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(product => {
+        document.getElementById("editForm").style.display = "block";
+        document.getElementById("editId").value = product.ProductID;
+        document.getElementById("editName").value = product.Name;
+        document.getElementById("editDescription").value = product.Description || '';
+        document.getElementById("editSupplier").value = product.SupplierID || '';
+      })
+      .catch(error => {
+        console.error('Error fetching product details:', error);
+        showNotification('Failed to load product details: ' + error.message, 'error');
+      });
+  }
+
+  function updateProduct() {
+    const id = parseInt(document.getElementById("editId").value);
+    const name = document.getElementById("editName").value;
+    const description = document.getElementById("editDescription").value;
+    const supplierId = document.getElementById("editSupplier").value;
+
+    if (!name || !supplierId) {
+      showNotification("Please fill all required fields (Name and Supplier).", "error");
+      return;
+    }
+
+    const productData = {
+      name: name,
+      description: description,
+      supplier_id: parseInt(supplierId)
+    };
+
+    fetch(`/api/products/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(productData),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      showNotification('Product updated successfully!', 'success');
+      hideEditForm();
+      loadProducts(); // Reload the products list
+    })
+    .catch(error => {
+      console.error('Error updating product:', error);
+      showNotification('Failed to update product: ' + error.message, 'error');
+    });
+  }
+
+  function deleteProduct(id) {
+    if (confirm("Are you sure you want to delete this product?")) {
+      fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        showNotification('Product deleted successfully!', 'success');
+        loadProducts(); // Reload the products list
+      })
+      .catch(error => {
+        console.error('Error deleting product:', error);
+        showNotification('Failed to delete product: ' + error.message, 'error');
+      });
+    }
+  }
+
+  function viewDetails(id) {
+    const detailRow = document.getElementById(`details-${id}`);
+    
+    // If we're already showing this detail, hide it
+    if (detailRow && detailRow.classList.contains('hidden-row') === false) {
+      detailRow.classList.add('hidden-row');
+      return;
+    }
+    
+    // Hide any currently showing details
+    const allDetails = document.querySelectorAll('[id^="details-"]');
+    allDetails.forEach(row => row.classList.add('hidden-row'));
+    
+    // Show loading in the detail row
+    detailRow.classList.remove('hidden-row');
+    detailRow.firstChild.innerHTML = '<div class="loading">Loading product details...</div>';
+    
+    // Fetch product inventory across warehouses
+    fetch(`/api/products/${id}/inventory`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(inventory => {
+        let detailsHTML = `
+          <div class="details">
+            <h4><i class="fas fa-boxes"></i> Product Inventory by Warehouse</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>Warehouse</th>
+                  <th>Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        
+        if (inventory.length === 0) {
+          detailsHTML += `<tr><td colspan="2" style="text-align: center;">No inventory found</td></tr>`;
+        } else {
+          inventory.forEach(item => {
+            detailsHTML += `
+              <tr>
+                <td>${item.WarehouseLocation}</td>
+                <td>${item.Quantity}</td>
+              </tr>
+            `;
+          });
+        }
+        
+        detailsHTML += `
+              </tbody>
+            </table>
+          </div>
+        `;
+        
+        detailRow.firstChild.innerHTML = detailsHTML;
+      })
+      .catch(error => {
+        console.error('Error fetching product details:', error);
+        detailRow.firstChild.innerHTML = `
+          <div class="error-message">Failed to load product details: ${error.message}</div>
+        `;
+      });
+  }
+
+  function showNotification(message, type) {
+    const notificationArea = document.getElementById('notification-area');
+    const notification = document.createElement('div');
+    notification.className = type === 'error' ? 'error-message' : 'success-message';
+    notification.textContent = message;
+    
+    notificationArea.appendChild(notification);
+    
+    // Remove notification after 5 seconds
+    setTimeout(() => {
+      notification.remove();
+    }, 5000);
+  }
+</script>
+
+</body>
+</html>

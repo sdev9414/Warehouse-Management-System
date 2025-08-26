@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Warehouse Reports</title>
+  <style>
+    :root {
+      --primary: #0056a3;
+      --primary-light: #0074cc;
+      --primary-dark: #003366;
+      --primary-gradient: linear-gradient(90deg, #0056a3, #0074cc);
+      --background-gradient: linear-gradient(145deg, #9baab7, #11375b);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --item-bg: linear-gradient(145deg, #e1eeff, #f1f8ff);
+      --item-hover: linear-gradient(145deg, #d0e9ff, #eaf6ff);
+      --text-dark: #333;
+      --text-light: #fff;
+      --shadow-sm: 0 2px 6px rgba(0, 100, 200, 0.1);
+      --shadow-md: 0 6px 20px rgba(0, 86, 179, 0.3);
+      --shadow-lg: 0 12px 35px rgba(0, 123, 255, 0.25);
+      --border-radius-sm: 10px;
+      --border-radius-md: 12px;
+      --border-radius-lg: 18px;
+      --spacing-xs: 5px;
+      --spacing-sm: 10px;
+      --spacing-md: 15px;
+      --spacing-lg: 25px;
+      --spacing-xl: 35px;
+      --spacing-xxl: 40px;
+      --font-size-xs: 0.9rem;
+      --font-size-sm: 1rem;
+      --font-size-md: 1.05rem;
+      --font-size-lg: 1.2rem;
+      --font-size-xl: 1.5rem;
+      --font-size-xxl: 2rem;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      height: 100%; 
+      background: var(--background-gradient);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start;
+      color: var(--text-dark);
+      scroll-behavior: smooth;
+    }
+    
+    .report-container {
+      background: var(--card-bg); 
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: var(--spacing-xl); 
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: 80vw; 
+      max-width: 1200px; 
+      max-height: 90vh; 
+      overflow-y: auto;
+      margin: var(--spacing-xl) 0;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .report-header {
+      background: var(--primary-gradient);
+      color: var(--text-light); 
+      padding: var(--spacing-lg); 
+      border-radius: var(--border-radius-md);
+      margin-bottom: var(--spacing-xxl); 
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .report-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+    
+    .report-header h1 { 
+      margin: 0; 
+      font-size: var(--font-size-xxl);
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    
+    .report-section { 
+      margin-bottom: var(--spacing-xxl);
+      position: relative;
+    }
+    
+    .report-section h2 {
+      color: var(--primary-dark); 
+      margin-bottom: var(--spacing-md);
+      border-bottom: 2px solid var(--primary-light); 
+      padding-bottom: var(--spacing-xs);
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      display: inline-block;
+    }
+    
+    ul { 
+      list-style: none; 
+      padding: 0; 
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-gap: var(--spacing-md);
+    }
+    
+    ul li {
+      background: var(--item-bg);
+      margin: 0;
+      padding: var(--spacing-lg); 
+      border-radius: var(--border-radius-sm);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease; 
+      color: var(--primary-dark);
+      cursor: pointer; 
+      font-size: var(--font-size-md);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+    }
+    
+    ul li::before {
+      content: "→";
+      margin-right: var(--spacing-sm);
+      color: var(--primary-light);
+      font-weight: bold;
+      transition: transform 0.3s ease;
+    }
+    
+    ul li:hover {
+      background: var(--item-hover);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+    
+    ul li:hover::before {
+      transform: translateX(5px);
+    }
+    
+    .footer { 
+      text-align: center; 
+      font-size: var(--font-size-xs); 
+      color: #444; 
+      margin-top: var(--spacing-xxl);
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Modal */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000;
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%;
+      background: rgba(0,0,0,0.5); 
+      padding-top: 60px;
+      overflow-y: auto;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background: #fff; 
+      margin: 5% auto;
+      padding: var(--spacing-md);
+      border: 1px solid rgba(0,0,0,0.1);
+      width: 85%; 
+      max-width: 1000px; 
+      border-radius: var(--border-radius-md);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      animation: slideIn 0.4s ease-out;
+      position: relative;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+      background: var(--primary);
+      color: var(--text-light);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+      margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) var(--spacing-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h2 {
+      margin: 0;
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+    }
+    
+    .modal-body { 
+      padding: var(--spacing-md); 
+      font-size: var(--font-size-sm);
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    
+    /* Table styling */
+    .modal-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: var(--spacing-sm);
+      box-shadow: var(--shadow-sm);
+      border-radius: var(--border-radius-sm);
+      overflow: hidden;
+    }
+    
+    .modal-body th {
+      background: var(--primary-gradient);
+      color: var(--text-light);
+      font-weight: 500;
+      text-align: left;
+      padding: var(--spacing-md);
+    }
+    
+    .modal-body td {
+      padding: var(--spacing-md);
+      border-bottom: 1px solid #eee;
+    }
+    
+    .modal-body tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .modal-body tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .modal-body tr:hover {
+      background-color: #f0f7ff;
+    }
+    
+    .close {
+      color: rgba(255,255,255,0.8);
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .close:hover, .close:focus {
+      color: var(--text-light);
+      text-decoration: none;
+      transform: scale(1.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) { 
+      .report-container { width: 90vw; padding: var(--spacing-lg); }
+      .report-header h1 { font-size: 1.8rem; }
+      .report-section h2 { font-size: 1.3rem; }
+      ul { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+    }
+    
+    @media (max-width: 768px) { 
+      .report-container { width: 95vw; padding: var(--spacing-md); }
+      .report-header h1 { font-size: 1.6rem; }
+      .report-section h2 { font-size: 1.2rem; }
+      ul { grid-template-columns: 1fr; }
+      .modal-content { width: 95%; }
+    }
+    
+    @media (max-width: 480px) { 
+      .report-container { padding: var(--spacing-sm); }
+      .report-header h1 { font-size: 1.4rem; }
+      .report-section h2 { font-size: 1.1rem; }
+      ul li { font-size: 0.9rem; padding: var(--spacing-md); }
+      .modal-header h2 { font-size: 1.1rem; }
+    }
+    
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+    }
+    .loading div {
+      position: absolute;
+      border: 4px solid var(--primary);
+      opacity: 1;
+      border-radius: 50%;
+      animation: loading 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+    .loading div:nth-child(2) {
+      animation-delay: -0.5s;
+    }
+    @keyframes loading {
+      0% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 1;
+      }
+      100% {
+        top: 0px;
+        left: 0px;
+        width: 72px;
+        height: 72px;
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="report-container">
+    <div class="report-header"><h1>Warehouse Reports</h1></div>
+
+    <div class="report-section">
+      <h2>Inventory Reports</h2>
+      <ul>
+        <li onclick="openModal('inventoryStock')">Current Stock by Warehouse</li>
+        <li onclick="openModal('lowStock')">Low Stock Alerts</li>
+        <li onclick="openModal('stockValuation')">Stock Valuation</li>
+      </ul>
+    </div>
+
+    <div class="report-section">
+      <h2>Order & Shipment Reports</h2>
+      <ul>
+        <li onclick="openModal('ordersByDate')">Orders by Date Range</li>
+        <li onclick="openModal('pendingShipments')">Pending Shipments</li>
+        <li onclick="openModal('shipmentHistory')">Shipment History</li>
+      </ul>
+    </div>
+
+    <div class="report-section">
+      <h2>Movement & Logistics</h2>
+      <ul>
+        <li onclick="openModal('inventoryMovement')">Inventory Movement Logs</li>
+        <li onclick="openModal('productTransfer')">Product Transfer Summary</li>
+      </ul>
+    </div>
+
+    <div class="report-section">
+      <h2>Supplier Reports</h2>
+      <ul>
+        <li onclick="openModal('supplierProducts')">Products Supplied by Each Supplier</li>
+        <li onclick="openModal('topSuppliers')">Top Suppliers by Volume</li>
+      </ul>
+    </div>
+
+    <div class="report-section">
+      <h2>Customer & Sales Reports</h2>
+      <ul>
+        <li onclick="openModal('topCustomers')">Top Customers</li>
+        <li onclick="openModal('salesSummary')">Sales Summary</li>
+      </ul>
+    </div>
+
+    <div class="report-section">
+      <h2>User & Access Reports</h2>
+      <ul>
+        <li onclick="openModal('managerAssignments')">Warehouse Manager Assignments</li>
+        <li onclick="openModal('loginAudit')">User Login Audit Trail</li>
+      </ul>
+    </div>
+
+    <div class="footer">&copy; 2025 Warehouse Management System</div>
+  </div>
+
+  <!-- All Modals -->
+  <div id="inventoryStock" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Current Stock by Warehouse</h2>
+        <span class="close" onclick="closeModal('inventoryStock')">&times;</span>
+      </div>
+      <div class="modal-body" id="inventoryStock-body"></div>
+    </div>
+  </div>
+
+  <div id="lowStock" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Low Stock Alerts</h2>
+        <span class="close" onclick="closeModal('lowStock')">&times;</span>
+      </div>
+      <div class="modal-body" id="lowStock-body"></div>
+    </div>
+  </div>
+
+  <div id="stockValuation" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Stock Valuation</h2>
+        <span class="close" onclick="closeModal('stockValuation')">&times;</span>
+      </div>
+      <div class="modal-body" id="stockValuation-body"></div>
+    </div>
+  </div>
+
+  <div id="ordersByDate" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Orders by Date Range</h2>
+        <span class="close" onclick="closeModal('ordersByDate')">&times;</span>
+      </div>
+      <div class="modal-body" id="ordersByDate-body"></div>
+    </div>
+  </div>
+
+  <div id="pendingShipments" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Pending Shipments</h2>
+        <span class="close" onclick="closeModal('pendingShipments')">&times;</span>
+      </div>
+      <div class="modal-body" id="pendingShipments-body"></div>
+    </div>
+  </div>
+
+  <div id="shipmentHistory" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Shipment History</h2>
+        <span class="close" onclick="closeModal('shipmentHistory')">&times;</span>
+      </div>
+      <div class="modal-body" id="shipmentHistory-body"></div>
+    </div>
+  </div>
+
+  <div id="inventoryMovement" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Inventory Movement Logs</h2>
+        <span class="close" onclick="closeModal('inventoryMovement')">&times;</span>
+      </div>
+      <div class="modal-body" id="inventoryMovement-body"></div>
+    </div>
+  </div>
+
+  <div id="productTransfer" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Product Transfer Summary</h2>
+        <span class="close" onclick="closeModal('productTransfer')">&times;</span>
+      </div>
+      <div class="modal-body" id="productTransfer-body"></div>
+    </div>
+  </div>
+
+  <div id="supplierProducts" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Products Supplied by Each Supplier</h2>
+        <span class="close" onclick="closeModal('supplierProducts')">&times;</span>
+      </div>
+      <div class="modal-body" id="supplierProducts-body"></div>
+    </div>
+  </div>
+
+  <div id="topSuppliers" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Top Suppliers by Volume</h2>
+        <span class="close" onclick="closeModal('topSuppliers')">&times;</span>
+      </div>
+      <div class="modal-body" id="topSuppliers-body"></div>
+    </div>
+  </div>
+
+  <div id="topCustomers" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Top Customers</h2>
+        <span class="close" onclick="closeModal('topCustomers')">&times;</span>
+      </div>
+      <div class="modal-body" id="topCustomers-body"></div>
+    </div>
+  </div>
+
+  <div id="salesSummary" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Sales Summary</h2>
+        <span class="close" onclick="closeModal('salesSummary')">&times;</span>
+      </div>
+      <div class="modal-body" id="salesSummary-body"></div>
+    </div>
+  </div>
+
+  <div id="managerAssignments" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Warehouse Manager Assignments</h2>
+        <span class="close" onclick="closeModal('managerAssignments')">&times;</span>
+      </div>
+      <div class="modal-body" id="managerAssignments-body"></div>
+    </div>
+  </div>
+
+  <div id="loginAudit" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>User Login Audit Trail</h2>
+        <span class="close" onclick="closeModal('loginAudit')">&times;</span>
+      </div>
+      <div class="modal-body" id="loginAudit-body"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_ROOT = 'http://127.0.0.1:5000';
+
+    function createLoadingIndicator() {
+      const loading = document.createElement('div');
+      loading.className = 'loading';
+      loading.innerHTML = '<div></div><div></div>';
+      return loading;
+    }
+
+    function renderTable(bodyEl, data) {
+      bodyEl.innerHTML = '';
+      if (!Array.isArray(data) || data.length === 0) {
+        bodyEl.innerHTML = '<p>No data available for this report.</p>';
+        return;
+      }
+      
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const header = document.createElement('tr');
+      
+      Object.keys(data[0]).forEach(key => {
+        const th = document.createElement('th');
+        th.textContent = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        header.appendChild(th);
+      });
+      
+      thead.appendChild(header);
+      table.appendChild(thead);
+      
+      const tbody = document.createElement('tbody');
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        Object.values(row).forEach(val => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      
+      table.appendChild(tbody);
+      bodyEl.appendChild(table);
+    }
+
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      
+      const body = document.getElementById(id + '-body');
+      body.innerHTML = '';
+      body.appendChild(createLoadingIndicator());
+      
+      let url = '';
+      switch(id) {
+        case 'inventoryStock':    url = `${API_ROOT}/api/inventory-stock`; break;
+        case 'lowStock':          url = `${API_ROOT}/api/inventory-low-stock?threshold=10`; break;
+        case 'stockValuation':    url = `${API_ROOT}/api/inventory-valuation`; break;
+        case 'ordersByDate':      url = `${API_ROOT}/api/orders?start_date=2025-01-01&end_date=2025-04-19`; break;
+        case 'pendingShipments':  url = `${API_ROOT}/api/pending-shipments`; break;
+        case 'shipmentHistory':   url = `${API_ROOT}/api/shipment-history`; break;
+        case 'inventoryMovement': url = `${API_ROOT}/api/inventory-movement`; break;
+        case 'productTransfer':   url = `${API_ROOT}/api/product-transfer`; break;
+        case 'supplierProducts':  url = `${API_ROOT}/api/supplier-products`; break;
+        case 'topSuppliers':      url = `${API_ROOT}/api/top-suppliers?limit=5`; break;
+        case 'topCustomers':      url = `${API_ROOT}/api/top-customers?limit=5`; break;
+        case 'salesSummary':      url = `${API_ROOT}/api/sales-summary`; break;
+        case 'managerAssignments':url = `${API_ROOT}/api/manager-assignments`; break;
+        case 'loginAudit':        url = `${API_ROOT}/api/login-audit`; break;
+        default:
+          body.innerHTML = '<p>Unknown report type</p>';
+          return;
+      }
+      
+      fetch(url)
+        .then(r => { 
+          if (!r.ok) throw new Error(r.status + ' ' + r.statusText); 
+          return r.json(); 
+        })
+        .then(data => renderTable(body, data))
+        .catch(err => { 
+          console.error(err); 
+          body.innerHTML = `<p style="color:red; text-align:center; padding:20px;">
+            Error loading data: ${err.message}
+            <br><br>
+            <button onclick="retryFetch('${id}')">Retry</button>
+          </p>`; 
+        });
+    }
+
+    function retryFetch(id) {
+      openModal(id);
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      document.body.style.overflow = '';
+    }
+    
+    window.onclick = e => {
+      document.querySelectorAll('.modal').forEach(m => {
+        if (e.target === m) closeModal(m.id);
+      });
+    };
+    
+    // Close modals with ESC key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal').forEach(m => {
+          if (m.style.display === 'block') closeModal(m.id);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

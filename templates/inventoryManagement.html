@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Warehouse Inventory Management</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --primary-light: #34495e;
+      --secondary: #3498db;
+      --secondary-light: #5dade2;
+      --accent: #e74c3c;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger: #c0392b;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .container { 
+      max-width: 1200px;
+      margin: 30px auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 30px;
+      font-size: 2.2em;
+      font-weight: 600;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    h1:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: var(--secondary);
+      border-radius: 2px;
+    }
+    
+    h2 {
+      color: var(--primary);
+      margin: 25px 0 15px;
+      font-size: 1.5em;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+    
+    h2:before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 22px;
+      background: var(--secondary);
+      margin-right: 10px;
+      border-radius: 3px;
+    }
+    
+    .panel {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .warehouse-select, .inventory-actions {
+      margin-bottom: 30px;
+    }
+    
+    label {
+      font-size: 0.95em;
+      margin-right: 15px;
+      color: var(--dark);
+      font-weight: 500;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    
+    select, input[type=number] {
+      padding: 10px 15px;
+      font-size: 1em;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background-color: #fff;
+      color: var(--dark);
+      transition: all 0.3s;
+      min-width: 200px;
+      margin-right: 15px;
+    }
+    
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 10px 20px;
+      font-size: 0.95em;
+      font-weight: 500;
+      color: #fff;
+      background-color: var(--secondary);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    button:hover {
+      background-color: var(--secondary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+    
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .remove-btn {
+      background-color: var(--accent);
+    }
+    
+    .remove-btn:hover {
+      background-color: var(--danger);
+    }
+    
+    .inventory-table {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      table-layout: fixed;
+    }
+    
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    th {
+      background-color: var(--primary);
+      color: #fff;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+    }
+    
+    tr:hover td {
+      background-color: rgba(52, 152, 219, 0.08);
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn-add {
+      background-color: var(--success);
+    }
+    
+    .btn-add:hover {
+      background-color: #2ecc71;
+    }
+    
+    .btn-update {
+      background-color: var(--warning);
+    }
+    
+    .btn-update:hover {
+      background-color: #f1c40f;
+    }
+    
+    .btn-transfer {
+      background-color: var(--primary);
+    }
+    
+    .btn-transfer:hover {
+      background-color: var(--primary-light);
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+        margin: 15px;
+      }
+      
+      .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      select, input[type=number] {
+        width: 100%;
+        margin-bottom: 10px;
+        min-width: unset;
+      }
+      
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      
+      th, td {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Warehouse Inventory Management</h1>
+
+    <!-- Select Warehouse -->
+    <div class="panel warehouse-select">
+      <div class="form-group">
+        <label for="warehouse">Select Warehouse:</label>
+        <select id="warehouse">
+          <option value="">-- Select Warehouse --</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Inventory Actions -->
+    <div class="panel inventory-actions">
+      <h2>Manage Inventory</h2>
+      <div class="form-group">
+        <label for="productSelect">Product:</label>
+        <select id="productSelect" disabled>
+          <option value="">-- Select Product --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="quantityInput">Quantity:</label>
+        <input type="number" id="quantityInput" min="0" value="0" disabled />
+        <button id="addBtn" class="btn-add" disabled>Add</button>
+        <button id="updateBtn" class="btn-update" disabled>Update</button>
+      </div>
+    </div>
+
+    <!-- Inventory Movement Section -->
+    <div class="panel inventory-movement">
+      <h2>Transfer Inventory</h2>
+      <div class="form-group">
+        <label for="sourceWarehouse">From Warehouse:</label>
+        <select id="sourceWarehouse">
+          <option value="">-- Select Source Warehouse --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="destinationWarehouse">To Warehouse:</label>
+        <select id="destinationWarehouse">
+          <option value="">-- Select Destination Warehouse --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="transferProduct">Product:</label>
+        <select id="transferProduct" disabled>
+          <option value="">-- Select Product --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="transferQuantity">Quantity:</label>
+        <input type="number" id="transferQuantity" min="1" value="1" disabled />
+        <button id="transferBtn" class="btn-transfer" disabled>Transfer</button>
+      </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="panel inventory-table">
+      <h2>Inventory Details</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th>Description</th>
+            <th>Quantity in Stock</th>
+            <th>Supplier</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchWarehouses();
+      fetchAllProducts();
+      document.getElementById('warehouse').addEventListener('change', onWarehouseChange);
+      document.getElementById('productSelect').addEventListener('change', onProductSelect);
+      document.getElementById('addBtn').addEventListener('click', addInventory);
+      document.getElementById('updateBtn').addEventListener('click', updateInventory);
+      
+      // New inventory movement event listeners
+      document.getElementById('sourceWarehouse').addEventListener('change', onSourceWarehouseChange);
+      document.getElementById('transferProduct').addEventListener('change', onTransferProductChange);
+      document.getElementById('transferBtn').addEventListener('click', transferInventory);
+    });
+
+    let allProducts = [];
+    let warehouseInventory = [];
+    let allWarehouses = [];
+
+    function fetchWarehouses() {
+      fetch('/api/warehouses')
+        .then(res => res.ok ? res.json() : Promise.reject(res.status))
+        .then(data => {
+          allWarehouses = data;
+          populateSelect('warehouse', data, 'WarehouseID', 'Location');
+          populateSelect('sourceWarehouse', data, 'WarehouseID', 'Location');
+          populateSelect('destinationWarehouse', data, 'WarehouseID', 'Location');
+        })
+        .catch(err => console.error('Error loading warehouses', err));
+    }
+
+    function fetchAllProducts() {
+      fetch('/api/products')
+        .then(res => res.ok ? res.json() : Promise.reject(res.status))
+        .then(data => {
+          allProducts = data;
+        })
+        .catch(err => console.error('Error loading all products', err));
+    }
+
+    function onWarehouseChange() {
+      const wid = document.getElementById('warehouse').value;
+      if (!wid) return;
+      fetch(`/api/warehouses/${wid}/inventory`)
+        .then(res => res.ok ? res.json() : Promise.reject(res.status))
+        .then(items => {
+          warehouseInventory = items;
+          populateTable(items);
+          populateProductSelect();
+        })
+        .catch(err => console.error('Error loading inventory', err));
+    }
+
+    function populateProductSelect() {
+      const sel = document.getElementById('productSelect');
+      sel.innerHTML = '<option value="">-- Select Product --</option>';
+      
+      // Create a map to merge duplicate products
+      const productMap = new Map();
+      
+      warehouseInventory.forEach(inv => {
+        if (productMap.has(inv.ProductID)) {
+          // Update existing entry
+          const existingItem = productMap.get(inv.ProductID);
+          existingItem.Quantity += inv.Quantity;
+        } else {
+          // Add new entry
+          productMap.set(inv.ProductID, {...inv});
+        }
+      });
+      
+      // Add all products with their quantities
+      allProducts.forEach(p => {
+        const inv = productMap.get(p.ProductID);
+        const opt = document.createElement('option');
+        opt.value = p.ProductID;
+        opt.textContent = p.Name + (inv ? ` (Qty: ${inv.Quantity})` : ' (Qty: 0)');
+        opt.dataset.quantity = inv ? inv.Quantity : 0;
+        sel.appendChild(opt);
+      });
+      
+      sel.disabled = false;
+    }
+
+    function populateSelect(id, items, valKey, textKey) {
+      const sel = document.getElementById(id);
+      sel.innerHTML = `<option value="">-- Select --</option>`;
+      items.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item[valKey];
+        opt.textContent = item[textKey];
+        sel.appendChild(opt);
+      });
+    }
+
+    function populateTable(items) {
+      const tbody = document.querySelector('.inventory-table tbody');
+      tbody.innerHTML = '';
+      
+      // Create a map to ensure we don't have duplicates
+      const productMap = new Map();
+      
+      // Aggregate quantities for same products
+      items.forEach(item => {
+        if (productMap.has(item.ProductID)) {
+          // Update existing entry
+          const existingItem = productMap.get(item.ProductID);
+          existingItem.Quantity += item.Quantity;
+        } else {
+          // Add new entry
+          productMap.set(item.ProductID, {...item});
+        }
+      });
+      
+      // Now create the table rows from our de-duplicated map
+      productMap.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.ProductID}</td>
+          <td>${item.ProductName}</td>
+          <td>${item.Description}</td>
+          <td>${item.Quantity}</td>
+          <td>${item.Supplier}</td>
+          <td><button class="remove-btn" onclick="removeInventoryFromRow(${item.ProductID})">Remove</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function onProductSelect() {
+      const sel = document.getElementById('productSelect');
+      const qty = parseInt(sel.selectedOptions[0]?.dataset.quantity, 10) || 0;
+      const valid = !!sel.value;
+      document.getElementById('quantityInput').value = qty;
+      toggleControls(valid);
+    }
+
+    function toggleControls(enabled) {
+      ['quantityInput','addBtn','updateBtn'].forEach(id => {
+        document.getElementById(id).disabled = !enabled;
+      });
+    }
+
+    function addInventory() {
+      const wid = document.getElementById('warehouse').value;
+      const pid = document.getElementById('productSelect').value;
+      const qty = parseInt(document.getElementById('quantityInput').value,10);
+      fetch(`/api/warehouses/${wid}/inventory/add`, {
+        method: 'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({product_id:pid, quantity:qty})
+      })
+      .then(_=> onWarehouseChange())
+      .catch(err=>alert('Add failed'));
+    }
+
+    function updateInventory() {
+      const wid = document.getElementById('warehouse').value;
+      const pid = document.getElementById('productSelect').value;
+      const qty = parseInt(document.getElementById('quantityInput').value,10);
+      fetch(`/api/warehouses/${wid}/inventory/${pid}`, {
+        method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({quantity:qty})
+      })
+      .then(_=> onWarehouseChange())
+      .catch(err=>alert('Update failed'));
+    }
+
+    function removeInventoryFromRow(productId) {
+      const wid = document.getElementById('warehouse').value;
+      if (!wid || !productId) return;
+
+      if (!confirm("Are you sure you want to remove this product from inventory?")) return;
+
+      fetch(`/api/warehouses/${wid}/inventory/${productId}`, {
+        method: 'DELETE'
+      })
+      .then(_ => onWarehouseChange())
+      .catch(err => alert('Remove failed'));
+    }
+
+    // INVENTORY TRANSFER FUNCTIONS
+    function onSourceWarehouseChange() {
+      const sourceWid = document.getElementById('sourceWarehouse').value;
+      if (!sourceWid) {
+        document.getElementById('transferProduct').disabled = true;
+        document.getElementById('transferProduct').innerHTML = '<option value="">-- Select Product --</option>';
+        return;
+      }
+      
+      // Fetch inventory for the selected source warehouse
+      fetch(`/api/warehouses/${sourceWid}/inventory`)
+        .then(res => res.ok ? res.json() : Promise.reject(res.status))
+        .then(items => {
+          // Populate transfer product dropdown with available products
+          const transferProductSelect = document.getElementById('transferProduct');
+          transferProductSelect.innerHTML = '<option value="">-- Select Product --</option>';
+          
+          // Remove duplicates and combine quantities
+          const productMap = new Map();
+          items.forEach(item => {
+            if (item.Quantity > 0) {
+              if (productMap.has(item.ProductID)) {
+                const existingItem = productMap.get(item.ProductID);
+                existingItem.Quantity += item.Quantity;
+              } else {
+                productMap.set(item.ProductID, {...item});
+              }
+            }
+          });
+          
+          if (productMap.size > 0) {
+            productMap.forEach(item => {
+              const opt = document.createElement('option');
+              opt.value = item.ProductID;
+              opt.textContent = `${item.ProductName} (Available: ${item.Quantity})`;
+              opt.dataset.maxQuantity = item.Quantity;
+              transferProductSelect.appendChild(opt);
+            });
+            transferProductSelect.disabled = false;
+          } else {
+            const opt = document.createElement('option');
+            opt.textContent = 'No products available';
+            transferProductSelect.appendChild(opt);
+            transferProductSelect.disabled = true;
+          }
+        })
+        .catch(err => console.error('Error loading source warehouse inventory', err));
+    }
+
+    function onTransferProductChange() {
+      const transferProduct = document.getElementById('transferProduct');
+      const transferQuantity = document.getElementById('transferQuantity');
+      const transferBtn = document.getElementById('transferBtn');
+      
+      if (!transferProduct.value) {
+        transferQuantity.disabled = true;
+        transferBtn.disabled = true;
+        return;
+      }
+      
+      const maxQty = parseInt(transferProduct.selectedOptions[0].dataset.maxQuantity, 10) || 0;
+      transferQuantity.max = maxQty;
+      transferQuantity.value = Math.min(1, maxQty);
+      transferQuantity.disabled = false;
+      transferBtn.disabled = false;
+    }
+
+    function transferInventory() {
+      const sourceWid = document.getElementById('sourceWarehouse').value;
+      const destWid = document.getElementById('destinationWarehouse').value;
+      const productId = document.getElementById('transferProduct').value;
+      const quantity = parseInt(document.getElementById('transferQuantity').value, 10);
+      
+      if (!sourceWid || !destWid || !productId || quantity <= 0) {
+        alert('Please fill in all fields with valid values');
+        return;
+      }
+      
+      if (sourceWid === destWid) {
+        alert('Source and destination warehouses must be different');
+        return;
+      }
+      
+      // Send transfer request to backend
+      fetch('/api/inventory/transfer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          source_warehouse_id: sourceWid,
+          destination_warehouse_id: destWid,
+          product_id: productId,
+          quantity: quantity
+        })
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => Promise.reject(err));
+        }
+        return res.json();
+      })
+      .then(data => {
+        alert('Inventory transferred successfully');
+        // Reset fields
+        document.getElementById('transferProduct').innerHTML = '<option value="">-- Select Product --</option>';
+        document.getElementById('transferProduct').disabled = true;
+        document.getElementById('transferQuantity').value = 1;
+        document.getElementById('transferQuantity').disabled = true;
+        document.getElementById('transferBtn').disabled = true;
+        
+        // Refresh the inventory table if current warehouse is involved in transfer
+        const currentWid = document.getElementById('warehouse').value;
+        if (currentWid === sourceWid || currentWid === destWid) {
+          onWarehouseChange();
+        }
+      })
+      .catch(err => {
+        console.error('Transfer failed', err);
+        alert(`Transfer failed: ${err.error || 'Unknown error'}`);
+      });
+    }
+  </script>
+</body>
+</html>

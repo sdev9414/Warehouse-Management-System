@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Warehouse Order & Shipment Management</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; line-height: 1.6; background-color: #e6f0ff; color: #333; }
+    header { background-color: #003366; color: white; padding: 20px 0; text-align: center; }
+    header nav ul { list-style: none; }
+    header nav ul li { display: inline; margin: 0 15px; }
+    header nav ul li a { color: white; text-decoration: none; font-weight: bold; font-size: 18px; }
+    h1 { margin-bottom: 10px; font-size: 2.5em; }
+    main { margin-top: 20px; padding: 0 20px; }
+    h2 { margin-bottom: 10px; color: #003366; font-size: 1.8em; }
+    .actions { margin-bottom: 20px; }
+    button { padding: 12px 24px; margin-right: 10px; background-color: #005bb5; color: white; border: none; cursor: pointer; font-size: 1.2em; }
+    button:hover { background-color: #003366; }
+    input[type="text"] { padding: 12px; width: 250px; border: 1px solid #ccc; font-size: 1.2em; }
+    input[type="text"]:focus { border-color: #005bb5; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; background-color: white; }
+    table th, table td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+    table th { background-color: #003366; color: white; }
+    table tr:nth-child(even) { background-color: #f2f2f2; }
+    table td button { background-color: #0077b3; color: white; border: none; padding: 6px 12px; cursor: pointer; }
+    table td button:hover { background-color: #005bb5; }
+    footer { background-color: #003366; color: white; text-align: center; padding: 20px 0; margin-top: 30px; }
+    footer p { font-size: 1.2em; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+    .modal-content { background: white; padding: 20px; border-radius: 8px; width: 80%; max-width: 600px; max-height: 80%; overflow-y: auto; }
+    .close-btn { float: right; cursor: pointer; font-size: 1.5em; color: #333; }
+    .close-btn:hover { color: red; }
+    .modal table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+    .modal th, .modal td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    .modal th { background-color: #003366; color: white; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    .product-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .product-row select, .product-row input { flex: 1; }
+    .add-product-btn { background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-bottom: 15px; }
+    .submit-btn { background-color: #005bb5; color: white; border: none; padding: 12px; cursor: pointer; width: 100%; font-size: 1.1em; }
+    .submit-btn:hover { background-color: #003366; }
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; }
+      button { padding: 10px 20px; font-size: 1em; }
+      input[type="text"] { width: 200px; font-size: 1em; }
+      .actions { display: flex; flex-direction: column; align-items: flex-start; }
+      .actions button { margin-bottom: 10px; }
+      table { font-size: 0.9em; }
+    }
+    @media (max-width: 480px) {
+      header nav ul { display: flex; flex-direction: column; align-items: center; }
+      header nav ul li { margin: 10px 0; }
+      h1 { font-size: 1.5em; }
+      button { width: 100%; padding: 10px; }
+      table { font-size: 0.8em; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <h1>Warehouse Management System</h1>
+      <nav>
+        <ul>
+          <li><a href="#orders-tab">Orders</a></li>
+          <li><a href="#shipments-tab">Shipments</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <!-- Orders -->
+      <section id="orders-tab">
+        <h2>Orders</h2>
+        <div class="actions">
+          <button onclick="createOrder()">Create New Order</button>
+          <input type="text" id="search-orders" placeholder="Search Orders..." />
+        </div>
+        <table id="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer Name</th>
+              <th>Order Date</th>
+              <th>Shipment Date</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Shipments -->
+      <section id="shipments-tab">
+        <h2>Shipments</h2>
+        <div class="actions">
+          <button onclick="createShipment()">Create New Shipment</button>
+          <input type="text" id="search-shipments" placeholder="Search Shipments..." />
+        </div>
+        <table id="shipments-table">
+          <thead>
+            <tr>
+              <th>Shipment ID</th>
+              <th>Warehouse Location</th>
+              <th>Shipment Date</th>
+              <th>Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Warehouse Management System</p>
+    </div>
+  </footer>
+
+  <!-- Order Details Modal -->
+  <div id="orderModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('orderModal')">&times;</span>
+      <h3>Order Details</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody id="order-products-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Shipment Details Modal -->
+  <div id="shipmentModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('shipmentModal')">&times;</span>
+      <h3>Shipment Details</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody id="shipment-products-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create Order Modal -->
+  <div id="createOrderModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('createOrderModal')">&times;</span>
+      <h3>Create New Order</h3>
+      <form id="create-order-form">
+        <div class="form-group">
+          <label for="customer-name">Customer Name:</label>
+          <input type="text" id="customer-name" required>
+        </div>
+        <div class="form-group">
+          <label for="order-date">Order Date:</label>
+          <input type="date" id="order-date" required>
+        </div>
+        <div class="form-group">
+          <label for="shipment-date">Shipment Date (optional):</label>
+          <input type="date" id="shipment-date">
+        </div>
+        
+        <h4>Products</h4>
+        <div id="order-products-container">
+          <div class="product-row">
+            <select class="product-select" required>
+              <option value="">Select Product</option>
+              <!-- Products will be loaded dynamically -->
+            </select>
+            <input type="number" placeholder="Quantity" min="1" required>
+          </div>
+        </div>
+        <button type="button" class="add-product-btn" onclick="addOrderProductRow()">Add Another Product</button>
+        
+        <button type="submit" class="submit-btn">Create Order</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create Shipment Modal -->
+  <div id="createShipmentModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('createShipmentModal')">&times;</span>
+      <h3>Create New Shipment</h3>
+      <form id="create-shipment-form">
+        <div class="form-group">
+          <label for="warehouse-location">Warehouse Location:</label>
+          <input type="text" id="warehouse-location" required>
+        </div>
+        <div class="form-group">
+          <label for="shipment-date-input">Shipment Date:</label>
+          <input type="date" id="shipment-date-input" required>
+        </div>
+        <div class="form-group">
+          <label for="shipment-status">Status:</label>
+          <select id="shipment-status" required>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+        
+        <h4>Products</h4>
+        <div id="shipment-products-container">
+          <div class="product-row">
+            <select class="product-select" required>
+              <option value="">Select Product</option>
+              <!-- Products will be loaded dynamically -->
+            </select>
+            <input type="number" placeholder="Quantity" min="1" required>
+          </div>
+        </div>
+        <button type="button" class="add-product-btn" onclick="addShipmentProductRow()">Add Another Product</button>
+        
+        <button type="submit" class="submit-btn">Create Shipment</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Global variable to store product list
+    let productList = [];
+
+    window.onload = async () => {
+      // Load product list first
+      try {
+        const response = await fetch('/api/products');
+        productList = await response.json();
+        console.log("Loaded products:", productList);
+        
+        // Initialize product dropdowns in both forms
+        initializeProductDropdowns();
+      } catch (err) {
+        console.error("Failed to load products:", err);
+        alert("Failed to load products. Please refresh the page.");
+      }
+
+      // Load orders and shipments
+      loadOrders();
+      loadShipments();
+
+      document.getElementById('search-orders').addEventListener('input', e => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('#orders-table tbody tr').forEach(r =>
+          r.style.display = r.textContent.toLowerCase().includes(term) ? '' : 'none'
+        );
+      });
+      
+      document.getElementById('search-shipments').addEventListener('input', e => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('#shipments-table tbody tr').forEach(r =>
+          r.style.display = r.textContent.toLowerCase().includes(term) ? '' : 'none'
+        );
+      });
+      
+      // Set today's date as default for date inputs
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('order-date').value = today;
+      document.getElementById('shipment-date-input').value = today;
+      
+      // Form submission handlers
+      document.getElementById('create-order-form').addEventListener('submit', handleOrderSubmit);
+      document.getElementById('create-shipment-form').addEventListener('submit', handleShipmentSubmit);
+    };
+
+    function initializeProductDropdowns() {
+      // Select all product dropdowns and populate them
+      const productSelects = document.querySelectorAll('.product-select');
+      productSelects.forEach(select => {
+        populateProductDropdown(select);
+      });
+    }
+
+    function populateProductDropdown(selectElement) {
+      // Clear existing options except the first one
+      while (selectElement.options.length > 1) {
+        selectElement.remove(1);
+      }
+      
+      // Add product options
+      productList.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.ProductID;
+        option.textContent = product.Name;
+        selectElement.appendChild(option);
+      });
+    }
+
+    function loadOrders() {
+      fetch('/api/orders/all')
+        .then(r => r.json())
+        .then(data => {
+          const tbody = document.querySelector('#orders-table tbody');
+          tbody.innerHTML = '';
+          data.forEach(o => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${o.id}</td>
+                <td>${o.customer_name}</td>
+                <td>${o.order_date}</td>
+                <td>${o.shipment_date || '-'}</td>
+                <td><button onclick="viewOrderDetails(${o.id})">View</button></td>
+              </tr>`;
+          });
+        })
+        .catch(err => console.error('Failed to load orders:', err));
+    }
+
+    function loadShipments() {
+      fetch('/api/shipments/all')
+        .then(r => r.json())
+        .then(data => {
+          const tbody = document.querySelector('#shipments-table tbody');
+          tbody.innerHTML = '';
+          data.forEach(s => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${s.id}</td>
+                <td>${s.warehouse_location}</td>
+                <td>${s.shipment_date}</td>
+                <td>${s.status}</td>
+                <td><button onclick="viewShipmentDetails(${s.id})">View</button></td>
+              </tr>`;
+          });
+        })
+        .catch(err => console.error('Failed to load shipments:', err));
+    }
+
+    function viewOrderDetails(orderId) {
+      fetch(`/api/orders/${orderId}/products`)
+        .then(r => r.json())
+        .then(items => {
+          const tbody = document.getElementById('order-products-body');
+          tbody.innerHTML = '';
+          items.forEach(i => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${i.product_name}</td>
+                <td>${i.quantity}</td>
+              </tr>`;
+          });
+          openModal('orderModal');
+        })
+        .catch(err => console.error('Failed to load order details:', err));
+    }
+
+    function viewShipmentDetails(shipmentId) {
+      fetch(`/api/shipments/${shipmentId}/products`)
+        .then(r => r.json())
+        .then(items => {
+          const tbody = document.getElementById('shipment-products-body');
+          tbody.innerHTML = '';
+          items.forEach(i => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${i.product_name}</td>
+                <td>${i.quantity}</td>
+              </tr>`;
+          });
+          openModal('shipmentModal');
+        })
+        .catch(err => console.error('Failed to load shipment details:', err));
+    }
+
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+    
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function createOrder() {
+      // Reset form fields
+      document.getElementById('customer-name').value = '';
+      document.getElementById('order-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('shipment-date').value = '';
+      
+      // Reset product rows
+      const container = document.getElementById('order-products-container');
+      container.innerHTML = `
+        <div class="product-row">
+          <select class="product-select" required>
+            <option value="">Select Product</option>
+          </select>
+          <input type="number" placeholder="Quantity" min="1" required>
+        </div>
+      `;
+      
+      // Populate the product dropdown
+      populateProductDropdown(container.querySelector('.product-select'));
+      
+      openModal('createOrderModal');
+    }
+    
+    function createShipment() {
+      // Reset form fields
+      document.getElementById('warehouse-location').value = '';
+      document.getElementById('shipment-date-input').value = new Date().toISOString().split('T')[0];
+      document.getElementById('shipment-status').value = 'Pending';
+      
+      // Reset product rows
+      const container = document.getElementById('shipment-products-container');
+      container.innerHTML = `
+        <div class="product-row">
+          <select class="product-select" required>
+            <option value="">Select Product</option>
+          </select>
+          <input type="number" placeholder="Quantity" min="1" required>
+        </div>
+      `;
+      
+      // Populate the product dropdown
+      populateProductDropdown(container.querySelector('.product-select'));
+      
+      openModal('createShipmentModal');
+    }
+    
+    function addOrderProductRow() {
+      const container = document.getElementById('order-products-container');
+      const newRow = document.createElement('div');
+      newRow.className = 'product-row';
+      newRow.innerHTML = `
+        <select class="product-select" required>
+          <option value="">Select Product</option>
+        </select>
+        <input type="number" placeholder="Quantity" min="1" required>
+      `;
+      container.appendChild(newRow);
+      
+      // Populate the new product dropdown
+      populateProductDropdown(newRow.querySelector('.product-select'));
+    }
+    
+    function addShipmentProductRow() {
+      const container = document.getElementById('shipment-products-container');
+      const newRow = document.createElement('div');
+      newRow.className = 'product-row';
+      newRow.innerHTML = `
+        <select class="product-select" required>
+          <option value="">Select Product</option>
+        </select>
+        <input type="number" placeholder="Quantity" min="1" required>
+      `;
+      container.appendChild(newRow);
+      
+      // Populate the new product dropdown
+      populateProductDropdown(newRow.querySelector('.product-select'));
+    }
+    
+    function handleOrderSubmit(e) {
+      e.preventDefault();
+      
+      // Gather form data
+      const customerName = document.getElementById('customer-name').value;
+      const orderDate = document.getElementById('order-date').value;
+      const shipmentDate = document.getElementById('shipment-date').value;
+      
+      // Gather products
+      const products = [];
+      document.querySelectorAll('#order-products-container .product-row').forEach(row => {
+        const productSelect = row.querySelector('.product-select');
+        const quantityInput = row.querySelector('input[type="number"]');
+        
+        // Get selected product name by ProductID
+        const productId = productSelect.value;
+        const selectedProduct = productList.find(p => p.ProductID == productId);
+        
+        products.push({
+          product_id: productId,
+          product_name: selectedProduct ? selectedProduct.Name : '',
+          quantity: parseInt(quantityInput.value)
+        });
+      });
+      
+      const orderData = {
+        customer_name: customerName,
+        order_date: orderDate,
+        shipment_date: shipmentDate || null,
+        products: products
+      };
+      
+      // Submit to API
+      fetch('/api/orders/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('Order created successfully!');
+        closeModal('createOrderModal');
+        loadOrders(); // Refresh the orders list
+      })
+      .catch(error => {
+        console.error('Error creating order:', error);
+        alert('Failed to create order. Please try again.');
+      });
+    }
+    
+    function handleShipmentSubmit(e) {
+      e.preventDefault();
+      
+      // Gather form data
+      const warehouseLocation = document.getElementById('warehouse-location').value;
+      const shipmentDate = document.getElementById('shipment-date-input').value;
+      const status = document.getElementById('shipment-status').value;
+      
+      // Gather products
+      const products = [];
+      document.querySelectorAll('#shipment-products-container .product-row').forEach(row => {
+        const productSelect = row.querySelector('.product-select');
+        const quantityInput = row.querySelector('input[type="number"]');
+        
+        // Get selected product name by ProductID
+        const productId = productSelect.value;
+        const selectedProduct = productList.find(p => p.ProductID == productId);
+        
+        products.push({
+          product_id: productId,
+          product_name: selectedProduct ? selectedProduct.Name : '',
+          quantity: parseInt(quantityInput.value)
+        });
+      });
+      
+      const shipmentData = {
+        warehouse_location: warehouseLocation,
+        shipment_date: shipmentDate,
+        status: status,
+        products: products
+      };
+      
+      // Submit to API
+      fetch('/api/shipments/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(shipmentData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('Shipment created successfully!');
+        closeModal('createShipmentModal');
+        loadShipments(); // Refresh the shipments list
+      })
+      .catch(error => {
+        console.error('Error creating shipment:', error);
+        alert('Failed to create shipment. Please try again.');
+      });
+    }
+  </script>
+</body>
+</html>

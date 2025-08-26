@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Supplier & Customer Management</title>
+  <style>
+    :root {
+      --primary-color: #0056b3;
+      --primary-dark: #003f7f;
+      --light-gray: #f8f9fa;
+      --medium-gray: #f4f4f4;
+      --border-color: #ddd;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --radius: 8px;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-gray);
+      margin: 0;
+      padding: 0;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--primary-color), #004494);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    header h1 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 2rem;
+    }
+    
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    section {
+      background: white;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      transition: transform 0.2s;
+    }
+    
+    section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    h2 { 
+      margin-top: 0;
+      color: var(--primary-color);
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      margin-right: 0.5rem;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.1s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    button:hover { 
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 0.9rem 1rem;
+      text-align: left;
+    }
+    
+    th { 
+      background-color: var(--medium-gray);
+      font-weight: 600;
+      position: relative;
+    }
+    
+    tbody tr {
+      transition: background-color 0.2s;
+    }
+    
+    tbody tr:nth-child(odd) { 
+      background-color: #f9f9f9; 
+    }
+    
+    tbody tr:hover {
+      background-color: #f0f4f8;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+      animation: fadeIn 0.2s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: var(--radius);
+      width: 90%; max-width: 600px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      animation: slideDown 0.3s;
+    }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-content h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .modal-content label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 500;
+      color: #444;
+    }
+    
+    .modal-content input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 5px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: border 0.2s;
+    }
+    
+    .modal-content input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0,86,179,0.1);
+    }
+    
+    .modal-content button { 
+      margin-top: 20px; 
+    }
+    
+    .btn-cancel {
+      background-color: #6c757d;
+    }
+    
+    .btn-cancel:hover {
+      background-color: #5a6268;
+    }
+    
+    .history-table th, .history-table td {
+      border: 1px solid var(--border-color);
+      padding: 0.7rem;
+    }
+    
+    .history-table th { 
+      background-color: var(--medium-gray);
+    }
+    
+    .action-btn {
+      padding: 0.5rem 0.8rem;
+      font-size: 0.9rem;
+      margin-right: 0.3rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    .edit-btn {
+      background-color: #28a745;
+    }
+    
+    .edit-btn:hover {
+      background-color: #218838;
+    }
+    
+    .view-btn {
+      background-color: #17a2b8;
+    }
+    
+    .view-btn:hover {
+      background-color: #138496;
+    }
+    
+    .delete-btn {
+      background-color: #dc3545;
+    }
+    
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 1rem;
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Supplier & Customer Management</h1>
+  </header>
+  <main>
+    
+    <section>
+      <h2>Supplier Management</h2>
+      <button onclick="openModal('supplier')">Add Supplier</button>
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Contact</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="supplier-list"></tbody>
+      </table>
+    </section>
+    <section>
+        <h2>Customer Management</h2>
+        <button onclick="openModal('customer')">Add Customer</button>
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Contact</th><th>Address</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="customer-list"></tbody>
+        </table>
+      </section>
+  </main>
+
+  <!-- Form Modal -->
+  <div id="formModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Add</h3>
+      <label for="nameInput">Name</label>
+      <input type="text" id="nameInput" placeholder="Enter name" />
+      <label for="contactInput">Contact Info</label>
+      <input type="text" id="contactInput" placeholder="Enter contact information" />
+      <label for="addressInput" id="addressLabel" style="display:none;">Address</label>
+      <input type="text" id="addressInput" placeholder="Enter address" style="display:none;" />
+      <button onclick="submitForm()">Submit</button>
+      <button onclick="closeModal()" class="btn-cancel">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Customer Order History Modal -->
+  <div id="historyModal" class="modal">
+    <div class="modal-content">
+      <h3>Order History for <span id="historyCustomerName"></span></h3>
+      <table class="history-table">
+        <thead>
+          <tr><th>Order ID</th><th>Date</th><th>Product</th><th>Quantity</th></tr>
+        </thead>
+        <tbody id="history-list"></tbody>
+      </table>
+      <button onclick="closeHistoryModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- Supplier Products Modal -->
+  <div id="supplierProductsModal" class="modal">
+    <div class="modal-content">
+      <h3>Products Supplied by <span id="supplierName"></span></h3>
+      <table class="history-table">
+        <thead>
+          <tr><th>Product ID</th><th>Name</th><th>Description</th></tr>
+        </thead>
+        <tbody id="supplier-products-list"></tbody>
+      </table>
+      <button onclick="closeSupplierProductsModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    let formType = 'customer', editId = null;
+    let customers = [], suppliers = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCustomers();
+      loadSuppliers();
+    });
+
+    async function loadCustomers() {
+      try {
+        const res = await fetch('/api/customers');
+        customers = await res.json();
+        renderCustomers();
+      } catch (e) {
+        console.error("Error loading customers:", e);
+      }
+    }
+
+    function renderCustomers() {
+      const tbody = document.getElementById('customer-list');
+      tbody.innerHTML = '';
+      
+      if (customers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="no-data">No customers found</td></tr>';
+        return;
+      }
+      
+      customers.forEach(c => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${c.name}</td>
+            <td>${c.contact}</td>
+            <td>${c.address}</td>
+            <td>
+              <button onclick="openModal('customer', ${c.id})" class="action-btn edit-btn">Edit</button>
+              <button onclick="showHistory(${c.id})" class="action-btn view-btn">History</button>
+              <button onclick="deleteEntity('customer', ${c.id})" class="action-btn delete-btn">Delete</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    async function loadSuppliers() {
+      try {
+        const res = await fetch('/api/suppliers');
+        suppliers = await res.json();
+        renderSuppliers();
+      } catch (e) {
+        console.error("Error loading suppliers:", e);
+      }
+    }
+
+    function renderSuppliers() {
+      const tbody = document.getElementById('supplier-list');
+      tbody.innerHTML = '';
+      
+      if (suppliers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="no-data">No suppliers found</td></tr>';
+        return;
+      }
+      
+      suppliers.forEach(s => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${s.name}</td>
+            <td>${s.contact}</td>
+            <td>
+              <button onclick="openModal('supplier', ${s.id})" class="action-btn edit-btn">Edit</button>
+              <button onclick="showSupplierProducts(${s.id})" class="action-btn view-btn">Products</button>
+              <button onclick="deleteEntity('supplier', ${s.id})" class="action-btn delete-btn">Delete</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    async function showSupplierProducts(sid) {
+      const supplier = suppliers.find(s => s.id === sid);
+      if (!supplier) {
+        alert("Supplier not found.");
+        return;
+      }
+
+      document.getElementById('supplierName').innerText = supplier.name;
+      document.getElementById('supplierProductsModal').style.display = 'block';
+
+      try {
+        const res = await fetch(`/api/suppliers/${sid}/products`);
+        const products = await res.json();
+
+        const tbody = document.getElementById('supplier-products-list');
+        tbody.innerHTML = '';
+
+        if (products.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="no-data">No products found</td></tr>';
+        } else {
+          products.forEach(p => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${p.ProductID}</td>
+                <td>${p.Name}</td>
+                <td>${p.Description}</td>
+              </tr>`;
+          });
+        }
+      } catch (e) {
+        console.error("Error fetching products:", e);
+        document.getElementById('supplier-products-list').innerHTML =
+          '<tr><td colspan="3" class="no-data">Error loading products</td></tr>';
+      }
+    }
+
+    function closeSupplierProductsModal() {
+      document.getElementById('supplierProductsModal').style.display = 'none';
+    }
+
+    function openModal(type, id = null) {
+      formType = type;
+      editId = id;
+      document.getElementById('modalTitle').innerText = `${id ? 'Edit' : 'Add'} ${type}`;
+      document.getElementById('addressLabel').style.display = type === 'customer' ? 'block' : 'none';
+      document.getElementById('addressInput').style.display = type === 'customer' ? 'block' : 'none';
+
+      if (id) {
+        const item = (type === 'customer' ? customers.find(c => c.id === id) : suppliers.find(s => s.id === id));
+        document.getElementById('nameInput').value = item.name;
+        document.getElementById('contactInput').value = item.contact;
+        if (type === 'customer') {
+          document.getElementById('addressInput').value = item.address;
+        }
+      } else {
+        ['nameInput','contactInput','addressInput'].forEach(i => document.getElementById(i).value = '');
+      }
+
+      document.getElementById('formModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('formModal').style.display = 'none';
+    }
+
+    async function submitForm() {
+      const name = document.getElementById('nameInput').value;
+      const contact = document.getElementById('contactInput').value;
+      const address = document.getElementById('addressInput').value;
+
+      const url = `/api/${formType}s${editId ? '/' + editId : ''}`;
+      const method = editId ? 'PUT' : 'POST';
+      const body = formType === 'customer'
+        ? JSON.stringify({ name, contact, address })
+        : JSON.stringify({ name, contact });
+
+      try {
+        await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body
+        });
+        closeModal();
+        formType === 'customer' ? loadCustomers() : loadSuppliers();
+      } catch (e) {
+        console.error("Error submitting form:", e);
+      }
+    }
+
+    async function deleteEntity(type, id) {
+      if (!confirm(`Delete this ${type}?`)) return;
+      try {
+        await fetch(`/api/${type}s/${id}`, { method: 'DELETE' });
+        type === 'customer' ? loadCustomers() : loadSuppliers();
+      } catch (e) {
+        console.error("Error deleting:", e);
+      }
+    }
+
+    async function showHistory(id) {
+      const customer = customers.find(c => c.id === id);
+      if (!customer) return;
+      document.getElementById('historyCustomerName').innerText = customer.name;
+      try {
+        const res = await fetch(`/api/customers/${id}/orders`);
+        const data = await res.json();
+        const tbody = document.getElementById('history-list');
+        tbody.innerHTML = '';
+        
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="no-data">No order history found</td></tr>';
+        } else {
+          data.forEach(o => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${o.OrderID}</td>
+                <td>${o.OrderDate}</td>
+                <td>${o.Product}</td>
+                <td>${o.QuantityOrdered}</td>
+              </tr>`;
+          });
+        }
+        document.getElementById('historyModal').style.display = 'block';
+      } catch (e) {
+        console.error("Error fetching order history:", e);
+        document.getElementById('history-list').innerHTML = 
+          '<tr><td colspan="4" class="no-data">Error loading order history</td></tr>';
+      }
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

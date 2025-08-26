@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory & Warehouse Management Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #071055;
+            background-image: url('warehouse-background.jpg'); /* Replace with your image path */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(7, 16, 85, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.92);
+            padding: 40px 35px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 30, 0.25);
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-area {
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            font-size: 42px;
+            color: #071055;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: #071055;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(to right, #071055, #3366ff);
+            bottom: -10px;
+            left: 25%;
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #071055;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.3px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #d0d7e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f8faff;
+            color: #333;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #3366ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(51, 102, 255, 0.2);
+            background-color: #fff;
+        }
+        
+        input::placeholder {
+            color: #a0a8b8;
+        }
+
+        .form-group i {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            color: #a0a8b8;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            user-select: none;
+        }
+
+        .remember-me input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d0d7e6;
+            border-radius: 4px;
+            margin-right: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .remember-me input[type="checkbox"]:checked {
+            background-color: #3366ff;
+            border-color: #3366ff;
+        }
+        
+        .remember-me input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            left: 3px;
+            top: -1px;
+        }
+        
+        .remember-me label {
+            margin-bottom: 0;
+            font-weight: 500;
+            color: #555;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button {
+            background: linear-gradient(to right, #071055, #3366ff);
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 600;
+            width: 100%;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(7, 16, 85, 0.2);
+        }
+
+        button:hover {
+            background: linear-gradient(to right, #050c3b, #254ecc);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(7, 16, 85, 0.25);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+
+        .additional-links {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .additional-links a {
+            color: #3366ff;
+            text-decoration: none;
+            margin: 0 5px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .additional-links a:hover {
+            color: #071055;
+            text-decoration: underline;
+        }
+        
+        .login-info {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: rgba(51, 102, 255, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #071055;
+            text-align: left;
+        }
+        
+        .login-info p {
+            margin: 5px 0;
+        }
+        
+        .login-info strong {
+            font-weight: 600;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .login-container {
+                margin: 15px;
+                padding: 30px 25px;
+            }
+            
+            h2 {
+                font-size: 24px;
+                margin-bottom: 25px;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            input[type="text"],
+            input[type="password"] {
+                padding: 12px;
+                font-size: 15px;
+            }
+            
+            button {
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            .logo-icon {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-area">
+            <i class="fas fa-warehouse logo-icon"></i>
+        </div>
+        <h2>Welcome Back</h2>
+        <form action="http://127.0.0.1:5000/login" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <button type="submit">Sign In</button>
+        </form>
+        
+        <div class="login-info">
+            <p><strong>Admin access:</strong> username: admin, password: password123</p>
+            <p><strong>Employee access:</strong> username: employee, password: employee123</p>
+        </div>
+        
+        
+    </div>
+</body>
+</html>

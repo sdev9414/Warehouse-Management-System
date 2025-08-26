@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Warehouse Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #f0f9ff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --background: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --radius: 8px;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
+      background: var(--background); 
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    header { 
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white; 
+      padding: 1.5rem; 
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    
+    header h1 {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    .container { 
+      max-width: 1280px; 
+      margin: auto; 
+      padding: 2rem 1rem;
+    }
+    
+    section { 
+      background: var(--card); 
+      padding: 2rem; 
+      margin-bottom: 2rem; 
+      border-radius: var(--radius); 
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    
+    h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    button {
+      background: var(--primary);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      background: var(--secondary);
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    tbody tr:hover {
+      background-color: rgba(37, 99, 235, 0.05);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+      animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background: var(--card);
+      margin: 5% auto;
+      padding: 2.5rem;
+      border-radius: var(--radius);
+      max-width: 800px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+    
+    .close:hover {
+      color: var(--text);
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: border 0.2s;
+    }
+    
+    input:focus, select:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    #mgrAssignMsg {
+      margin-top: 1rem;
+      color: #10b981;
+      font-weight: 500;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      background: rgba(16, 185, 129, 0.1);
+      text-align: center;
+    }
+    
+    #capResult {
+      margin-top: 1.5rem;
+      font-weight: 600;
+      padding: 1rem;
+      background: var(--secondary);
+      border-radius: var(--radius);
+      text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+      .button-group {
+        flex-direction: column;
+      }
+      
+      button {
+        width: 100%;
+      }
+      
+      .modal-content {
+        width: 90%;
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Warehouse Management System</h1>
+  </header>
+  <div class="container">
+    <section>
+      <h2>Features</h2>
+      <div class="button-group">
+        {% if session.get('role') == 'Admin' %}
+        <button onclick="openModal('warehouseModal')">Add/Edit Warehouse</button>
+        <button onclick="openModal('managerModal')">Assign Manager</button>
+        {% endif %}
+        <button onclick="openModal('capacityModal')">Track Capacity</button>
+        <button onclick="openModal('logModal')">Activity Log</button>
+        <button onclick="openModal('compareModal')">Compare Inventories</button>
+      </div>
+    </section>
+    <section>
+      <h2>Warehouse List</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>Capacity</th>
+            <th>Used</th>
+            <th>Manager</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="warehouseTableBody"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- Modals -->
+  <!-- 1) Add/Edit Warehouse -->
+  <div id="warehouseModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('warehouseModal')">&times;</span>
+      <h2>Add / Edit Warehouse</h2>
+      <div class="form-group">
+        <label>Location:</label>
+        <input id="whLocation" type="text">
+      </div>
+      <div class="form-group">
+        <label>Capacity:</label>
+        <input id="whCapacity" type="number">
+      </div>
+      <button onclick="saveWarehouse()">Save</button>
+    </div>
+  </div>
+
+  <!-- 2) Assign / Change Manager -->
+  <div id="managerModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('managerModal')">&times;</span>
+      <h2>Assign or Change Manager</h2>
+      <div class="form-group">
+        <label>Select Warehouse:</label>
+        <select id="mgrWh"></select>
+      </div>
+      <div class="form-group">
+        <label>Select Manager:</label>
+        <select id="mgrUser"></select>
+      </div>
+      <button onclick="saveManager()">Assign / Change Manager</button>
+      <div id="mgrAssignMsg"></div>
+    </div>
+  </div>
+
+  <!-- 3) Track Capacity -->
+  <div id="capacityModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('capacityModal')">&times;</span>
+      <h2>Track Capacity Used</h2>
+      <div class="form-group">
+        <label>Warehouse:</label>
+        <select id="capWh"></select>
+      </div>
+      <button onclick="showCapacity()">Show</button>
+      <div id="capResult"></div>
+    </div>
+  </div>
+
+  <!-- 4) Activity Log -->
+  <div id="logModal" class="modal">
+    <div class="modal-content" style="max-width: 1200px;">
+      <span class="close" onclick="closeModal('logModal')">&times;</span>
+      <h2>Activity Log</h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>From</th>
+              <th>To</th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5) Compare Inventories -->
+  <div id="compareModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('compareModal')">&times;</span>
+      <h2>Compare Inventories</h2>
+      <div class="form-group">
+        <label>Warehouse 1:</label>
+        <select id="cmpW1"></select>
+      </div>
+      <div class="form-group">
+        <label>Warehouse 2:</label>
+        <select id="cmpW2"></select>
+      </div>
+      <button onclick="compareWh()">Compare</button>
+      <table style="margin-top:1rem;">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>W1</th>
+            <th>W2</th>
+          </tr>
+        </thead>
+        <tbody id="cmpBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let warehouses = [], editIdx = null;
+    let currentUserID = null;
+    let isAdmin = false;
+  
+    function openModal(id) {
+      document.getElementById(id).style.display = 'block';
+      if (['managerModal','capacityModal','compareModal'].includes(id)) populateDropdowns();
+      if (id==='logModal') loadLog();
+      if (id==='warehouseModal' && editIdx!==null) {
+        const w = warehouses[editIdx];
+        document.getElementById('whLocation').value = w.location;
+        document.getElementById('whCapacity').value = w.capacity;
+      } else {
+        document.getElementById('whLocation').value = '';
+        document.getElementById('whCapacity').value = '';
+        editIdx = null;
+      }
+    }
+  
+    function closeModal(id){ 
+      document.getElementById(id).style.display = 'none'; 
+    }
+  
+    window.onload = function() {
+      getCurrentUser();
+    };
+  
+    async function getCurrentUser() {
+      try {
+        const res = await fetch('/api/current-user');
+        const user = await res.json();
+        currentUserID = user.UserID;
+        isAdmin = (user.Role === 'Admin');
+        loadWarehouses();
+      } catch(e) {
+        console.error("Error getting current user:", e);
+        loadWarehouses(); // fallback
+      }
+    }
+  
+    async function loadWarehouses() {
+      try {
+        const url = isAdmin 
+          ? '/api/warehouses' 
+          : `/api/warehouses/user/${currentUserID}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        warehouses = data.map(w=>({
+          id: w.WarehouseID,
+          location: w.Location,
+          capacity: w.Capacity,
+          used: '…',
+          manager: '-'
+        }));
+        renderWarehouses();
+  
+        // now fetch used‐capacity and manager
+        warehouses.forEach(async (w,i) => {
+          // 1) used / capacity
+          const cu = await fetch(`/api/warehouses/${w.id}/capacity-used`);
+          const cap = await cu.json();
+          w.used = cap.Used;
+          // 2) manager assignments
+          const ma = await fetch('/api/manager-assignments');
+          const ms = await ma.json();
+          const m = ms.find(x => x.WarehouseID === w.id);
+          w.manager = m ? m.Username : '-';
+          renderWarehouses();
+        });
+      } catch(e) {
+        console.error(e);
+      }
+    }
+  
+    function renderWarehouses() {
+      const b = document.getElementById('warehouseTableBody');
+      b.innerHTML = '';
+      warehouses.forEach((w,i) => {
+        b.innerHTML += `<tr>
+          <td>${w.location}</td>
+          <td>${w.capacity}</td>
+          <td>${w.used}</td>
+          <td>${w.manager}</td>
+          <td>${isAdmin 
+            ? `<button onclick="editWarehouse(${i})">Edit</button>` 
+            : `<button onclick="viewDetails(${i})">View</button>`}
+          </td>
+        </tr>`;
+      });
+    }
+  
+    function editWarehouse(i) {
+      editIdx = i;
+      openModal('warehouseModal');
+    }
+  
+    function viewDetails(i) {
+      const w = warehouses[i];
+      alert(`Warehouse Details:\n
+  Location: ${w.location}\n
+  Capacity: ${w.capacity}\n
+  Used: ${w.used}\n
+  Manager: ${w.manager}`);
+    }
+  
+    async function saveWarehouse() {
+      const loc = document.getElementById('whLocation').value.trim();
+      const cap = +document.getElementById('whCapacity').value;
+      if (!loc || isNaN(cap)) return alert('Fill all fields');
+      const url = editIdx===null
+        ? '/api/warehouses'
+        : `/api/warehouses/${warehouses[editIdx].id}`;
+      const method = editIdx===null ? 'POST' : 'PUT';
+      await fetch(url, {
+        method,
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          Location: loc,
+          Capacity: cap,
+          UserID: currentUserID
+        })
+      });
+      closeModal('warehouseModal');
+      loadWarehouses();
+    }
+  
+    function populateDropdowns() {
+      const warehouseUrl = isAdmin 
+        ? '/api/warehouses' 
+        : `/api/warehouses/user/${currentUserID}`;
+      fetch(warehouseUrl)
+        .then(r => r.json())
+        .then(ws => {
+          ['mgrWh','capWh','cmpW1','cmpW2'].forEach(id => {
+            const sel = document.getElementById(id);
+            sel.innerHTML = '';
+            ws.forEach(w => sel.add(new Option(w.Location, w.WarehouseID)));
+          });
+        });
+  
+      if (isAdmin) {
+        fetch('/api/users?role=Manager')
+          .then(r => r.json())
+          .then(us => {
+            const sel = document.getElementById('mgrUser');
+            sel.innerHTML = '';
+            us.forEach(u => sel.add(new Option(u.Username, u.UserID)));
+          });
+      }
+    }
+  
+    async function saveManager() {
+      const uid = +document.getElementById('mgrUser').value;
+      const wid = +document.getElementById('mgrWh').value;
+      if (!uid || !wid) return alert("Select both warehouse and manager");
+      try {
+        const res = await fetch('/api/manager-assignments', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ UserID: uid, WarehouseID: wid })
+        });
+        if (res.ok) {
+          document.getElementById('mgrAssignMsg').textContent = "Manager assigned successfully!";
+          setTimeout(() => {
+            closeModal('managerModal');
+            document.getElementById('mgrAssignMsg').textContent = "";
+          }, 1000);
+          loadWarehouses();
+        } else {
+          alert("Error assigning manager.");
+        }
+      } catch (e) {
+        console.error("Assignment failed", e);
+      }
+    }
+  
+    function showCapacity() {
+      const wid = +document.getElementById('capWh').value;
+      fetch(`/api/warehouses/${wid}/capacity-used`)
+        .then(r => r.json())
+        .then(d => {
+          document.getElementById('capResult').textContent =
+            `Used: ${d.Used} / ${d.Capacity}`;
+        });
+    }
+  
+    function loadLog() {
+      const logUrl = isAdmin 
+        ? '/api/inventory-movement' 
+        : `/api/inventory-movement/user/${currentUserID}`;
+      fetch(logUrl)
+        .then(r => r.json())
+        .then(logs => {
+          const body = document.getElementById('logBody');
+          body.innerHTML = '';
+          logs.forEach(l => {
+            body.innerHTML += `
+              <tr>
+                <td>${l.MovementDate}</td>
+                <td>${l.MovementType}</td>
+                <td>${l.Product}</td>
+                <td>${l.QuantityMoved}</td>
+                <td>${l.FromLocation || '-'}</td>
+                <td>${l.ToLocation   || '-'}</td>
+              </tr>`;
+          });
+        })
+        .catch(console.error);
+    }
+  
+    function compareWh() {
+      const w1 = +document.getElementById('cmpW1').value;
+      const w2 = +document.getElementById('cmpW2').value;
+      fetch(`/api/warehouse-comparison?w1=${w1}&w2=${w2}`)
+        .then(r => r.json())
+        .then(rows => {
+          const b = document.getElementById('cmpBody');
+          b.innerHTML = '';
+          rows.forEach(rw => {
+            b.innerHTML += `<tr>
+              <td>${rw.Product}</td>
+              <td>${rw.Qty1}</td>
+              <td>${rw.Qty2}</td>
+            </tr>`;
+          });
+        });
+    }
+  </script>
+  
+</body>
+</html>
